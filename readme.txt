@@ -4,6 +4,12 @@ The main.py file contains the graphs made for the intial analysis
         meaning that one age group was not representated within the churned population but was evident within the nonchurned population
 
 logistic.py is the logistic regression file. 
+    this file also includes the random forest algorithm
+    with the data comparing the two algorithms
+        - the confusion matrix
+        - ROC graph comparing the two
+        - and the precision of each accoring to their accuracy of churn rates assumptions
+
 
 Independent observations: Each data point is assumed to be independent of the others means there should be no correlation or dependence between the input samples.
 Binary dependent variables: It takes the assumption that the dependent variable must be binary, means it can take only two values. For more than two categories SoftMax functions are used.
@@ -15,4 +21,3 @@ dataMath.py
 contains the data cleaning through z-score normalization and removal of the redundant column age
 then creates the cleaned churn(containing only the churn values) and the cleanedNonC contains the cleaned data 
 
-T 
