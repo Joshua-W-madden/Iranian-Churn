@@ -75,10 +75,17 @@ print("f1 score: ", f1_score)
 
 importances = model2.feature_importances_
 
-print("\nImportance: ")
-for name, score in zip(feature_names, importances):
-    print(f"{name}: {score}")
-          
+# Made datafile with only random forest importances and the column names
+rf_df = pd.DataFrame({
+    "Feature": X.columns,
+    "Importance": importances
+})
+
+rf_df = rf_df.sort_values(by="Importance", ascending=False)
+print(rf_df)
+
+
+
 lr_probs = model.predict_proba(X_test)[:, 1]
 rf_probs = model2.predict_proba(X_test)[:, 1]
 

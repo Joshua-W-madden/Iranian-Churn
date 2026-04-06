@@ -3,10 +3,21 @@ import matplotlib.pyplot as plt
 
 dataset = pd.read_csv("Customer Churn.csv")
 
+#duplication
+#print(dataset.duplicated().sum())
+#print(dataset[dataset.duplicated()].value_counts("Churn"))
+
+
+# comment out section for data with duplicates included
+dataset.drop_duplicates()
+dataset.to_csv("noDup.csv", index=False) 
+
+dataset["Tariff Plan"] = dataset["Tariff Plan"].apply(lambda x: 1 if x == 2 else 0) #normalizes the tariff plan 1,0 values
 dataset = dataset.drop(["Age", "Customer Value"], axis=1) # removes redundant catagory
 target = dataset["Churn"] #saves target values
 dataset = dataset.drop("Churn",axis=1) # removes churn 
 exclude_cols = ["Age Group","Status", "Tariff Plan", "Complains" ]
+
 
 dataset["Tariff Plan"] = dataset["Tariff Plan"].replace(2, 0)
 dataset["Status"] = dataset["Status"].replace(2, 0) #sets the binary values to 1,0 for tariff plan and statys
@@ -17,11 +28,13 @@ cols_to_normalize = dataset.columns.difference(exclude_cols)
 dataset[cols_to_normalize] = (dataset[cols_to_normalize] - dataset[cols_to_normalize].mean()) / dataset[cols_to_normalize].std()
 
 
+
+# creates 2 new csv
 """
-creates 2 new csv
 dataset.to_csv("cleanedNonC.csv", index=False) 
 target.to_csv("cleanedChurn.csv", index=False)
 """
+
 fig, axes = plt.subplots(4, 3, figsize=(15, 10))
 axes = axes.flatten()
 for i, col in enumerate(dataset.columns):

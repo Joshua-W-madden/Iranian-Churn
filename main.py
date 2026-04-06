@@ -1,33 +1,30 @@
 import pandas as pd
+import numpy as np
 import matplotlib.pyplot as plt
 
 dataset = pd.read_csv("Customer Churn.csv")
 
-dataset["Tariff Plan"] = dataset["Tariff Plan"].apply(lambda x: 1 if x == 2 else 0) #normalizes the tariff plan binary values
-
-
 churn = dataset[dataset["Churn"] == 1]
 non_churn = dataset[dataset["Churn"] == 0]
 
-fig, axes = plt.subplots(4, 3, figsize=(15, 10))
+fig, axes = plt.subplots(4,3, figsize=(15, 10))
 axes = axes.flatten()  # turns the 3d array into 2d for faster processing
 
 columns = [
     "Call  Failure",
     "Complains",
     "Subscription  Length",
+    "Charge  Amount",
     "Seconds of Use",
     "Frequency of use",
     "Frequency of SMS",
     "Distinct Called Numbers",
     "Age Group",
     "Tariff Plan",
-    "Status", 
-    "Age",
-    "Customer Value"
+    "Status"
 ]
 
-#debugging and new information 1
+#debugging and new information 1 (check readme)
 """
 for i, col in enumerate(columns):
     if i in (1, 7, 9):
@@ -52,11 +49,17 @@ for i, col in enumerate(columns):
 
         non_counts = non_counts.reindex(all_categories, fill_value=0)
         churn_counts = churn_counts.reindex(all_categories, fill_value=0)
-        
-        x = range(len(non_counts))
-        axes[i].bar(x, non_counts.values, label="Not churned")
-        axes[i].bar(x, churn_counts.values, label="Churned")
-        axes[i].set_xticks(x)
+        if i == 7 :
+            x = range(len(non_counts))
+            axes[i].bar(x, non_counts.values, label="Not churned")
+            axes[i].bar(x, churn_counts.values, label="Churned")
+            axes[i].set_xticks(np.arange(min(x), max(x), 5))
+
+        else:
+            x = range(len(non_counts))
+            axes[i].bar(x, non_counts.values, label="Not churned")
+            axes[i].bar(x, churn_counts.values, label="Churned")
+            axes[i].set_xticks(x)
     else: 
         axes[i].hist([non_churn[col], churn[col]], label=["Not churned", "Churned"])
     axes[i].set_title(col)
