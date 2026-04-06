@@ -1,8 +1,9 @@
 import pandas as pd 
+import numpy as np
 from sklearn.model_selection import train_test_split
 from sklearn.linear_model import LogisticRegression
 from sklearn.ensemble import RandomForestClassifier
-from sklearn.metrics import accuracy_score, classification_report, confusion_matrix
+from sklearn.metrics import confusion_matrix
 from sklearn.metrics import roc_curve, auc
 import matplotlib.pyplot as plt
 
@@ -11,7 +12,7 @@ y = pd.read_csv("cleanedChurn.csv")
 y = y["Churn"].values.ravel()
 
 # Randomly selects 20% of data and denotes for testing and remainder is used for our training
-X_train, X_test, y_train, y_test = train_test_split(
+X_train, X_test, y_train, y_true = train_test_split(
     X, y,
     test_size=0.2,
     random_state=1 #used random state so this is repeatable as we will reuse the "randomizer" pattern through every rerun or refactor
@@ -19,19 +20,31 @@ X_train, X_test, y_train, y_test = train_test_split(
 
 model = LogisticRegression(max_iter=2000)
 model.fit(X_train, y_train)
-y_pred = model.predict(X_test)
+x_pred = model.predict(X_test)
+tPred = np.sum(x_pred == 1)
+fPred = np.sum(x_pred == 1)
 
-print("\nLogistic Regression")
-print("Accuracy:", accuracy_score(y_test, y_pred))
-print("\nConfusion Matrix:\n", confusion_matrix(y_test, y_pred))
-print("\nReport:\n", classification_report(y_test, y_pred))
-coefficients = model.coef_[0]
+#metrics
+tValues = np.sum(X_test == 1)
+fValues = np.sum(X_test == 0)
+cf = confusion_matrix(y_true, x_pred)
+TN, FP, FN, TP = cf.ravel()
+precision = TP / (TP + FP)
+recall    = TP / (TP + FN)
+f1_score  = 2 * (precision * recall) / (precision + recall)
+
+print("\n----Logistic Regression----")
+print("\nConfusion Matrix:\n", confusion_matrix(y_true, x_pred))
+print("recall: ", recall)
+print("precision: ", precision)
+print("f1 score: ", f1_score)
+
+coef = model.coef_[0]
 feature_names = X.columns
 
-print("Weight of each catagory")
-for feature, coef in zip(feature_names, coefficients):
-    print(f"{feature}: {coef}")
-
+print("\nColumn Coefficient:")
+for name, score in zip(feature_names, coef):
+    print(f"{name}: {score}")
 
 model2 = RandomForestClassifier(
     n_estimators=100,
@@ -42,26 +55,37 @@ model2.fit(X_train, y_train)
 
 # Predict
 predictions = model2.predict(X_test)
+tPred = np.sum(predictions == 1)
+fPred = np.sum(predictions == 0)
 
-print("\n\nRandom Forest")
-print("Accuracy:", accuracy_score(y_test, predictions))
-print("\nConfusion Matrix:\n", confusion_matrix(y_test, predictions))
-print("\nReport:\n", classification_report(y_test, predictions))
+#metrics
+tValues = np.sum(y_true == 1)
+fValues = np.sum(y_true == 0)
+cf = confusion_matrix(y_true, predictions)
+TN, FP, FN, TP = cf.ravel()
+precision = TP / (TP + FP)
+recall    = TP / (TP + FN)
+f1_score  = 2 * (precision * recall) / (precision + recall)
 
-importance = model2.feature_importances_
-feature_names = X.columns
+print("\n\n----Random Forest----")
+print("Confusion Matrix:\n", confusion_matrix(y_true, predictions))
+print("recall: ", recall)
+print("precision: ", precision)
+print("f1 score: ", f1_score)
 
-feat_imp = pd.Series(importance, index=feature_names)
-print("Importance of each catagory")
-print(feat_imp.sort_values(ascending=False))
+importances = model2.feature_importances_
 
+print("\nImportance: ")
+for name, score in zip(feature_names, importances):
+    print(f"{name}: {score}")
+          
 lr_probs = model.predict_proba(X_test)[:, 1]
 rf_probs = model2.predict_proba(X_test)[:, 1]
 
 
 # Compute ROC curves
-fpr_lr, tpr_lr, _ = roc_curve(y_test, lr_probs)
-fpr_rf, tpr_rf, _ = roc_curve(y_test, rf_probs)
+fpr_lr, tpr_lr, _ = roc_curve(y_true, lr_probs)
+fpr_rf, tpr_rf, _ = roc_curve(y_true, rf_probs)
 
 # area under curve
 auc_lr = auc(fpr_lr, tpr_lr)
@@ -73,7 +97,7 @@ plt.plot(fpr_lr, tpr_lr, label=f"Logistic Regression (AUC = {auc_lr:.2f})")
 plt.plot(fpr_rf, tpr_rf, label=f"Random Forest (AUC = {auc_rf:.2f})")
 
 # Random baseline
-plt.plot([0, 1], [0, 1], linestyle="--", label="Random")
+plt.plot([0, 1], [0, 1], linestyle="--", label="Random Classifier")
 
 plt.xlabel("False Positive Rate")
 plt.ylabel("True Positive Rate")
