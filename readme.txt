@@ -1,6 +1,8 @@
-First Run main.py
-Then dataMath.py
-Lastly logistic.py
+(libraries nessessary Panadas, matplotlib, numpy and sklearn)
+
+First Run main.py(close graph window when finished)
+Then dataMath.py(close graph window when finished)
+Lastly logistic.py(close graph window when finished) within terminal(metrics are displayed)
 
 The main.py file contains the graphs made for the intial analysis
     #debugging and new information 1
